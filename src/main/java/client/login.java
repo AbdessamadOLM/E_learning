@@ -36,14 +36,25 @@ public class login extends JFrame{
             public void actionPerformed(ActionEvent e) {
                 if (!usernamefiled.equals("")){
                     try {
-                       if(iserver.login(usernamefiled.getText(),passwordInput.getText())){
-                           new Etudiantview(usernamefiled.getText());
-                           dispose();
-                       }else{
-                           JOptionPane.showMessageDialog(new JFrame(),"username or password is wrong");
-                           usernamefiled.setText("");
-                           passwordInput.setText("");
-                       }
+                      if(usernamefiled.getText().endsWith("prof")){
+                          if(iserver.login(usernamefiled.getText(),passwordInput.getText(),true)){
+                              new Etudiantview(usernamefiled.getText());
+                              dispose();
+                          }else{
+                              JOptionPane.showMessageDialog(new JFrame(),"username or password is wrong prof");
+                              usernamefiled.setText("");
+                              passwordInput.setText("");
+                          }
+                      }else {
+                          if(iserver.login(usernamefiled.getText(),passwordInput.getText(),false)){
+                              new Etudiantview(usernamefiled.getText());
+                              dispose();
+                          }else{
+                              JOptionPane.showMessageDialog(new JFrame(),"username or password is wrong");
+                              usernamefiled.setText("");
+                              passwordInput.setText("");
+                          }
+                      }
 
                     } catch (RemoteException ex) {
                         ex.printStackTrace();

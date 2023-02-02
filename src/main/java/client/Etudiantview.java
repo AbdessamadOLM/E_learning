@@ -5,8 +5,7 @@ import server.Iserver;
 import javax.swing.*;
 import javax.swing.filechooser.FileSystemView;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.event.*;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -20,6 +19,8 @@ public class Etudiantview extends JFrame {
     public String name ;
     public Iserver iserver;
     public ClientImp client;
+    public Color color;
+    public int size = 10;
     public DefaultListModel model = new DefaultListModel();
     public List<String> listeUser = new ArrayList<>() ;
     public Etudiantview(String name) throws RemoteException {
@@ -28,7 +29,7 @@ public class Etudiantview extends JFrame {
            this.name = name;
            iserver = login.iserver;
            try{
-               client = new ClientImp(name,iserver,output,input,sharedFile) ;
+               client = new ClientImp(name,iserver,output,input,sharedFile,whiteboard) ;
            }catch (Exception e){
                System.out.println("error lier à ClientImp"+e.getMessage());
            }
@@ -79,16 +80,10 @@ public class Etudiantview extends JFrame {
                             extension[extension.length - 1].equals("java")||
                             extension[extension.length - 1].equals("php")||
                             extension[extension.length - 1].equals("c")||
-                            extension[extension.length - 1].equals("cpp")||
-                            extension[extension.length - 1].equals("xml")||
-                            extension[extension.length - 1].equals("exe")||
                             extension[extension.length - 1].equals("png")||
                             extension[extension.length - 1].equals("jpg")||
                             extension[extension.length - 1].equals("jpeg")||
-                            extension[extension.length - 1].equals("pdf")||
-                            extension[extension.length - 1].equals("jar")||
-                            extension[extension.length - 1].equals("rar")||
-                            extension[extension.length - 1].equals("zip")
+                            extension[extension.length - 1].equals("pdf")
                     ){
                         try {
                             ArrayList<Integer> inc;
@@ -121,17 +116,69 @@ public class Etudiantview extends JFrame {
                 }
             }
         });
+        whiteboard.addMouseMotionListener(new MouseMotionAdapter() {
+        });
+        whiteboard.addMouseMotionListener(new MouseMotionAdapter() {
+            @Override
+            public void mouseDragged(MouseEvent e) {
+                super.mouseDragged(e);
+                if(!sizeOfTrait.getText().isEmpty()){
+                    size = Integer.parseInt(sizeOfTrait.getText());
+                }
+                try {
+                    iserver.brodcastVue(e,name,color,size);
+                } catch (RemoteException ex) {
+                    ex.printStackTrace();
+                }
+                Graphics g = whiteboard.getGraphics();
+                g.setColor(color);
+                g.fillOval(e.getX(),e.getY(),size,size);
+            }
+        });
+        colorchoose.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                Color color1 = JColorChooser.showDialog(whiteboard, "Make a choice", Color.MAGENTA);
+                color = color1;
+            }
+        });
+        clearBoard.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    iserver.clearBoard(name);
+                } catch (RemoteException ex) {
+                    ex.printStackTrace();
+                }
+                Graphics2D g = (Graphics2D) whiteboard.getGraphics();
+                g.setBackground(Color.white);
+                g.clearRect(0, 0, whiteboard.getWidth(), whiteboard.getHeight());
+            }
+        });
+        deconexion.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    iserver.deconnexion(name);
+                } catch (RemoteException ex) {
+                    ex.printStackTrace();
+                }
+                dispose();
+            }
+        });
     }
 
 
     public void lancerComponent(){
         setContentPane(global);
         this.setLocationRelativeTo(null);
-        setSize(1000,400);
+        setSize(1000,500);
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         setVisible(true);
-        sharedFile.setBounds(100,100,200,200);
+        sharedFile.setSize(new Dimension(300,200));
         output.setFont(new Font("Serif",Font.BOLD,10));
+        whiteboard.setPreferredSize(new Dimension(500,250));
+        whiteboard.setBackground(Color.white);
     }
 
 
@@ -151,7 +198,10 @@ public class Etudiantview extends JFrame {
     private JButton fileChoose;
     private JPanel sharedFile ;
     private JPanel whiteboard;
-    private JScrollPane jScrollPane;
+    private JButton colorchoose;
+    private JButton clearBoard;
+    private JTextField sizeOfTrait;
+    private JButton deconexion;
 
 
 }

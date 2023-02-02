@@ -20,12 +20,14 @@ public class ClientImp extends UnicastRemoteObject implements Iclient{
     public  JTextField input;
     public JTextArea output;
     public JPanel paneFile ;
-    protected ClientImp(String name , Iserver server,JTextArea output,JTextField input,JPanel JpaneFile) throws RemoteException {
+    public JPanel whiteBoard;
+    protected ClientImp(String name , Iserver server,JTextArea output,JTextField input,JPanel JpaneFile,JPanel whiteBoard) throws RemoteException {
         this.name = name;
         this.chatserver = server;
         this.input = input;
         this.output = output;
         this.paneFile = JpaneFile;
+        this.whiteBoard = whiteBoard;
         chatserver.registerClientInSession(this);
     }
 
@@ -63,8 +65,7 @@ public class ClientImp extends UnicastRemoteObject implements Iclient{
                                 extension[extension.length - 1].equals("java")||
                                 extension[extension.length - 1].equals("php")||
                                 extension[extension.length - 1].equals("c")||
-                                extension[extension.length - 1].equals("cpp")||
-                                extension[extension.length - 1].equals("xml")
+                                extension[extension.length - 1].equals("pdf")
                         )
                             out.write((char)cc);
                         else{
@@ -104,8 +105,21 @@ public class ClientImp extends UnicastRemoteObject implements Iclient{
 
         });
         paneFile.add(label);
-        paneFile.repaint();
-        paneFile.revalidate();
+
+    }
+
+    @Override
+    public void reciveDiffusedVue(MouseEvent event, Color c, int size ) throws RemoteException {
+        Graphics g = whiteBoard.getGraphics();
+        g.setColor(c);
+        g.fillOval(event.getX(),event.getY(),size,size);
+    }
+
+    @Override
+    public void clear() throws RemoteException {
+        Graphics2D g = (Graphics2D) whiteBoard.getGraphics();
+        g.setBackground(Color.white);
+        g.clearRect(0, 0, whiteBoard.getWidth(), whiteBoard.getHeight());
     }
 
 }
